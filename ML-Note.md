@@ -150,6 +150,8 @@ FP: false positives
 
 ### supervised Learning
 
+### Polynomial Curve Fitting
+
 -   components for learning in common
 
     -   a set of variables: inputs x, which are measured or preset
@@ -187,4 +189,181 @@ FP: false positives
 
         -   $E_{RMS}$计算结果接近的情况下，我们选择更简单的模型（剃刀准则）
 
-        
+
+### Probability Perspective for Regression
+
+-   maximizing the posterior distribution is equivalent to minimizing the regularized sum-of-squares error function, with a regularization 
+
+    parameter given by $\lambda=\frac{\alpha}{\beta}$
+
+### Loss Function for Regression
+
+-   One simple generalization of the squared loss, called the Minkowski loss, whose expectation is given by
+
+    $\epsilon[\tau_q]=\int\int|y(x)-t|^qp(x,t)dxdt$
+
+    q=2: the expected squared loss
+
+### Linear Basis Function Models
+
+-   $y(x,w)=w_0+w_1x_1+\ldots +w_Dx_D$，where $x=(x_1,\ldots,x_D)^T$
+
+    This is often simply known as linear regression
+
+    parameters: $w_0,\ldots, w_D$
+
+    input variables: $x_i$
+
+-   An extension by considering linear combinations of fixed nonlinear functions of the input variables:
+
+    $y(x,w)=w_0+\overset{M-1}{\underset{j=1}{\sum}}w_j\phi_j(x)$，where $\phi_j(x)$ are know as basis function
+
+    e.g.: in polynomial curve fitting, $\phi_j(x)=x^j$
+
+    $w_0$ is called a bias parameter, $y(x,w)=\overset{M-1}{\underset{j=0}{\sum}}w_j\phi_j(x)=w^T\phi(x)$
+
+-   Polynomial curve fitting, $\phi_j(x)=x^j$
+
+-   Gaussian basis functions, $\phi_j(x)=exp\{-\frac{(x-\mu_j)^2}{2s^2}\}$
+
+-   Sigmodal basis functions, $\phi_j(x)=\sigma(\frac{x-\mu_j}{s})$，where $\sigma(a)$ is the logistic sigmoid function defined by $\sigma(a)=\frac{1}{1+exp(-a)}$
+
+-   $M<N,\space S=span(\phi_1,\ldots,\phi_{M-1})$
+
+    y can live anywhere in the M-dimensional subspace
+
+    $E_D(w)=||y-t||^2$ （真实值和估计值差距）
+
+    the least-squares solution for w corresponds to that choice of that lies in subspace S and that is closet to t
+
+    the solution corresponds to the orthogonal projection of t onto the subspace S
+
+-   To control over-fitting, total error function takes the form
+
+    $\overset{-}{E}(w)=E_D(w)+\lambda E_w(w)$
+
+    one of the simplest forms of regularizer is given by
+
+    $E_w(w)=\frac{1}{2}w^Tw$
+
+    if the sum-of squares error function is taken, then total error functions
+
+    $\frac{1}{2}\overset{N}{\underset{n=1}{\sum}}\{t_n-w^T\phi(x_n)\}^2+\frac{1}{2}w^Tw$
+
+    the close-formed solution for w is
+
+    $w=(\lambda I+\phi^T\phi)^{-1}\phi^Tt$
+
+### Model Complexity Issue
+
+Bias-Variance Decomposition
+
+## Linear Models for Classification
+
+-   Regression: $x\rightarrow y\space or\space \overset{\rightarrow}{y}$
+
+-   Classification: $x\rightarrow y=C_k,\space k=1,\ldots,K$
+
+    for probabilistic models: 
+
+    -   if K=2 the binary case, $y=1\rightarrow C_1$ and $y=0\rightarrow C_2$
+
+    -   if K>2 the multiple cases, we can use 1-of-K coding scheme, $\overset{\rightarrow}{y}\in R^k,\space y_j=1$, if the class is $C_j$; otherwise 0;
+
+        e.g.: $\overset{\rightarrow}{y}=(0,1,0,0,0)^T$
+
+-   Discriminant function: directly assigns each vector x to a specific class
+
+-   Probability inference: Modeling the conditional probability distribution $P(C_k|x)$ in an inference stage, then uses this to make optimal decision
+
+### Generalized Linear Models
+
+-   Linear classification models: $y(x)=w^Tx+w_0$
+
+-   Generalized linear models: generally we want to predict posterior probabilities (0, 1)
+
+    $y(x)=f(w^Tx+w_0)$
+
+    These models are called generalized linear models
+
+    -   f(.) is known as activation function
+    -   the decision surfaces correspond to $y(x)=constant\rightarrow w^Tx_0+w_0=constant$
+    -   the decision surfaces are linear functions of x, even if f(.) is nonlinear
+
+    The input vector x is assigned according to 
+    $$
+    x\in  
+    \begin{cases}
+    C_1,\space if\space y(x)\le \space 0 \\
+    C_2,\space otherwise
+    \end{cases}
+    $$
+
+-   Problem setting
+
+    -   Each class $C_k$ is described by its own linear model:
+
+        $y_k(x)=w_k^T+w_0$
+
+    -   Using vector notation: $y(x)=W^Tx$ by omitting the bias $w_0$, $W=[w_1,\ldots,w_k]$
+
+    -   Considering a training dataset $\{x_n,t_n\}_{n=1}^N$ and $X=[x_1,\ldots,x_N]$,$T=[t_1,\ldots,t_N]$
+
+    -   The sum-of squares error function can be written as $E_D(W)=\frac{1}{2}(XW-T)^T(XW-T)$
+
+        $\Rightarrow W=(X^TX)^{-1}X^TT=X^+T$
+
+        $\Rightarrow y(x)=W^Tx=T^T(X^+)^Tx$
+
+-   Consider a two-class problem in which there are $N_1$ points of class $C_1$ and $N_2$ points of class $C_2$
+
+-   The mean vectors in the original space:
+
+    $m_k=\frac{1}{N_k}\underset{i\in C_k}{\sum}x_i$
+
+    The means vectors in the projection spae with some projected direction w:
+
+    $\mu_k=\frac{1}{N_k}\underset{i\in C_k}{\sum}w^Tx_i$
+
+-   maximizing the between class variance and minimizing the within class variance is given by
+
+    $J(w)=\frac{(\mu_2-\mu1)^2}{\sigma_1+\sigma_2}=\frac{w^TS_Bw}{w^TS_Ww}$
+
+    $\ldots\Rightarrow w=S_W^{-1}(m_2-m_1)$
+
+-   Proessing elements can be regarded as the basis functions of a generalized linear discriminant:
+
+    $y(x)=f(w^T\phi(x))$
+
+    The nonlinear activation function f(.) is given by a step function of the form
+    $$
+    f(a)=
+    \begin{cases}
+    +1,\space a\ge0 \\
+    -1,\space a\lt0
+    \end{cases}
+    $$
+
+    $$
+    \begin{align}
+    &x_i\Rightarrow \Phi(x_i)=\Phi_i,x_i\Rightarrow t_i \\
+    &C_1:\space w^T\Phi_i\gt0;C2:\space w^T\Phi_i\lt0 \\
+    &C_1:\space t_i=+1;C_2:\space t_i=-1
+    \end{align}
+    $$
+
+    
+
+    The error function of the perceptrons
+
+    $E_P(w)=-\underset{\Phi_i\in M}{\sum}w^T\Phi_it_i$, where $M$ is the set of vectors $\Phi_i$ which are misclassified by the current weight vector $w$
+
+-   If we apply the pattern-by-pattern gradient descent rule to the perceptron cirterion we obtain
+
+    $w^{(\tau+1)}=w^{(\tau)}-\mu\nabla E_P(w)=w^{(\tau)}+\mu\phi(x_i)t_i$
+
+    if correctly classified:
+
+    $w^{(\tau+1)}=w^{(\tau)}$
+
+    
