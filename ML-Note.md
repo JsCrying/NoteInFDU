@@ -136,15 +136,29 @@ FP: false positives
 
 -   How many positives predicted are true positives?
 
-     $Precision=\frac{TP}{TP+FP}$
+    针对预测结果而言的，表示预测为正的样例中有多少是真正的正样例
+
+     查准率$Precision=\frac{TP}{TP+FP}$
 
 -   How many positives come back?
 
-    $Recall=\frac{TP}{TP+FN}$
+    针对原来的样本而言的，表示的是样本中的正例有多少被预测正确
+
+    查全率$Recall=\frac{TP}{TP+FN}$
 
 -   How many positives predicted are true positives and how many negatives predicted are true negatives?
 
     $Accuracy=\frac{TP+TN}{TP+TN+FP+FN}$
+    
+-   F1值是查准率与查全率的调和平均
+
+    $F1=\frac{2PR}{P+R}=\frac{2TP}{样例总数+TP-TN}$
+
+-   BEP平衡点，是查准率=查全率时的取值。可以以查准率为纵轴，以查全率为横作图的到曲线，简称P-R曲线来求BEP
+
+-   真正例率$TPR=\frac{TP}{TP+FN}$
+
+-   假正例率$FPR=\frac{FP}{TN+FP}$
 
 ## Linear Regression
 
@@ -366,4 +380,299 @@ Bias-Variance Decomposition
 
     $w^{(\tau+1)}=w^{(\tau)}$
 
+-   概率模型
+
+    $\sigma(a)=\frac{1}{1+exp(-a)}$
+
+    多个类：
+
+    $P(C_k|x)=\frac{p(x|C_k)P(C_k)}{\sum_j p(x|C_j)P(C_j)}=\frac{exp(a_k)}{\sum_j exp(a_j)}$, where $a_k=\ln p(x|C_k)P(C_k)$
+
+### Summary for Generative Models
+
+1.  choice of class conditional densities $p(x|C_k)$
+2.  using ML for the parameter estimation
+3.  together with prior probability
+4.  using Bayes' theorem, the posterior probabilities $P(C_k|x)$ are generalized linear function of $x\Rightarrow $ implicitly finding the parameters of a generalized linear model
+
+## SVM
+
+-   Suppose exists the optimal solution $(w^*,b^*)$, which defines a decision boundary corrctly classifying all the training samples, and every training sample is at least distance $\rho>0$ from the decision boundary, i.e.,
+
+    $|f(x_i)|=|(w^*)^Tx_i+b^*|=\rho$
+
+    $\rho$ plays a ceucial role for the percptron as it determines 
+
+    (1)how well the two classes can be separated
+
+    (2)how fast the perceptron learning algorithm convergess
+
+    (3)$\rho$ call a $margin$
+
+-   Definition: The hyperplane is in canonical form w.r.t. $X$ if $min_{x_i\in X}|w^Tx_i+b|=1$, $\rho=\frac{1}{2}(f(x^+)-f(x^-))=\frac{1}{||w||}$
+
+-   $\underset{W}{min}\{||w||^2\},s.t.\forall_{i=1}^{n}:y_i(w^Tx_i+b)\geq1$
+
+    using Lagrange theory:
+
+    $L(w,b,\alpha)=\frac{1}{2}||w||^2-\overset{n}{\underset{i=1}{\sum}}\alpha_i(y_i(w^Tx_i+b)-1)$, $\alpha_i\geq0$
+
+    $\Rightarrow w=\sum_{i=1}^{n}\alpha_iy_ix_i$
+
+-   The decision function $f(x)=w^Tx+b=sgn[\overset{n}{\underset{i=1}{\sum}}\alpha_{i}^*y_ix_{i}^*+b^*]$
+
+### 支持向量机基本型
+
+-   超平面方程: $w^Tx+b=0$
+
+-   最大间隔: 寻找参数$w,b$使得$\gamma$最大
+
+    $\underset{w,b}{argmax}\frac{2}{||w||},\space s.t.\space y_i(w^Tx_i+b)\geq1,i=1,2,\ldots,m$
+
+    $\underset{w,b}{argmin}\frac{1}{2}||w||^2,\space s.t.\space y_i(w^Tx_i+b)\geq1,i=1,2,\ldots,m$
+
+-   最终模型: $f(x)=w^Tx+b=\sum_{i=1}^{m}\alpha_iy_ix_{i}^Tx+b$
+
+-   KKT条件: 
+    $$
+    \begin{cases}
+    \alpha_i\geq0 \\
+    y_if(x_i)\geq1 \\
+    \alpha_i(y_if(x_i)-1)=0 \\
+    \end{cases}
+    $$
+    $y_i(f(x_i))\gt1\Rightarrow \alpha_i=0$
+
+### 非线性SVM
+
+-   预处理数据$\phi: \space X\rightarrow H,\space x\rightarrow \phi(x)$,  通常$dim(x)\ll dim(H)$
+
+-   $L(\alpha)=\overset{n}{\underset{i=1}{\sum}}\alpha_i-\frac{1}{2}\overset{n}{\underset{i=1}{\sum}}\overset{n}{\underset{l=1}{\sum}}y_iy_l\alpha_i\alpha_lk(x_i,x_l)$
+    $$
+    s.t.
+    \begin{cases}
+    \alpha_i\geq0,\space 1\leq i\leq n \\
+    \sum_{i=1}^ny_i\alpha_i=0
+    \end{cases}
+    $$
+    solution:
+
+    $f(x)=\overset{n}{\underset{i=1}{\sum}}\alpha_{i}^*y_ix^Tx_i+b^*$
+
+    can be formulated as:
+
+    $f(x)=\overset{n}{\underset{i=1}{\sum}}\alpha_{i}^*y_ik(x,x_i)+b^*$
+
+    examples of common kernels used:
+
+    Gaussian kernels: $k(x,x')=exp(-\frac{||x-x'||^2}{2\sigma^2})$
+
+    Polynomial kernels: $k(x,x')=(x^Tx'+c)^d$
+
+### Multi-Class Classification
+
+-   $\underset{w^{lj},\xi{lj}}{min}\{\frac{1}{2}||w^{lj}||^2+C\overset{n}{\underset{i=1}{\sum}}\xi_i^{lj}\}$
+
+    s.t.
+    $$
+    \begin{cases}
+    <w^{lj},x_i>+b\geq 1-\xi_{i}^{lj},y_i=l \\
+    <w^{lj},x_i>+b\leq -1+\xi_{i}^{lj},y_i=l,y_i=j \\
+    \forall_{i=1}^n:\xi_{i}^{lj}\gt0,l,j=1,\ldots,C
+    \end{cases}
+    $$
+
+### Primal SVM
+
+-   primal objective function for the soft-margin SVMs with constraints is:
+
+    $\frac{1}{2}||w||^2+C\overset{n}{\underset{i=1}{\sum}}\xi_i,s.t.\space \forall_{i=1}^n:y_i(w^Tx_i+b)\geq 1-\xi_i,\xi_i\geq0$
+
+-   By the algebra operation, the constraints can be integrated in objective function such that the objective function without constraints is:
+
+    $\frac{1}{2}||w||^2+C\overset{n}{\underset{i=1}{\sum}}V(y_i,w^Tx_i+b)$
+
+    $V(y_i,w^Tx_i+b)$ is the loss for the training patterns $x_i\in X_l$ defined by $V(y,t)=max(0,1-yt)$ (called $hinge \space loss$)
+
+-   Empirical risk functional
+
+    $R_{emp}[f]=\frac{1}{n}\overset{n}{\underset{i=1}{\sum}}V(y_i,f(x_i))$
+
+    for the classical regularization Networks:
+
+    $V(y_i,f(x_i))=(y_i-f(x_i))^2$
+
+    for the support vector classification:
+
+    $V(y_i,f(x_i))=|1-y_if(x_i)|_+,where\space |t|_+=\begin{cases}t,\space t\geq0 \\0,\space t\lt0\end{cases}$
+
+-   if the kernel exists, we can define the mapping 
+
+    $\phi(x)=k(\cdot,x)$
+
+    by the Representer theorem, we have
+
+    $f(\cdot)=\overset{n}{\underset{i=1}{\sum}}\beta_ik(\cdot,x_i)$
+
+    and with the reproducing property, we have
+
+    $f(x)=<f(\cdot),k(\cdot,x)>=\overset{n}{\underset{i=1}{\sum}}\beta_ik(x,x_i)$
+
+### Summary: Steps for Classification
+
+1.  prepare the pattern matrix
+
+2.  select the kernel function to use
+
+3.  select the parameter of the kernel function and the value of C
+
+    use the value suggested by the SVM software, or you can set apart a validation set to determine the value of the parameter
+
+4.  execute the training algorithm and obtain the $a_i$
+
+5.  unseen data can be classified using the $a_i$ and the support vectors
+
+### SVR
+
+-   Linear Support Vector Regression
+
+    $y=w_1x+b$
+
+    $|y_i-f(x_i)|_\epsilon\equiv max\{0,|y_i-f(x_i)|-\epsilon\}$
+
+-   Non-linear Support Vector Regression
+    $$
+    x\rightarrow \Phi(x)=(\sqrt x,\sqrt 2x^2) \\
+    Age\rightarrow \Phi(Age) \\
+    Age\rightarrow (\sqrt {Age},\sqrt 2Age^{2})
+    $$
+    $y=w_1x+b$
+
+    $y=w_1\sqrt x+w_2\sqrt 2x^2+b$
+
+-   Given training data $\{x_i,y_i\}_{i=1}^{n}$
+
+    Find: $w_1, b$ such that $y=w_1x+b$ optimally describes the data
+
+    $\underset{Complexity}{|w_1|} vs.\space \underset{Sum \space of\space errors}{\sum_i(\xi_i+\xi_{i}^*)}$
+
+    $\underset{w_1,b,\xi_i,\xi_{i}^*}{min}\frac{1}{2}w_1^2+C\underset{i}{\sum}(\xi_i+\xi_{i}^*)$
+
+    subect to:
+
+    $y_i-(w_1x_{i1})-b\leq\epsilon+\xi_i$
+
+    $w_1x_{i1}+b-y_i\leq\epsilon+\xi_{i}^*$
+
+    $\xi_i,\xi_{i}^*\geq0\space i=1,2,\ldots,n$
+
+    $L:=\frac{1}{2}||w||^2+C\underset{i}{\sum}(\xi_i+\xi_{i}^*)-\underset{i}{\sum}(\eta_i\xi_i+\eta_{i}^*\xi_{i}^*)\\-\underset{i}{\sum}\alpha_i(\epsilon+\xi_i-y_i+w'\phi(x_i)+b)\\ -\underset{i}{\sum}\alpha_{i}^{*}(\epsilon+\xi_{i}^*+y_i-w'\phi(x_i)-b)$
+    $$
+    \begin{align}
+    &\Rightarrow \\
+    &\frac{\partial L}{\partial w}=w-\sum_i(\alpha_i\alpha_{i}^*\phi(x_i))=0 \\
+    &\ldots \\
+    &f(x)=w'\phi(x)+b \\
+    &f(x)=\sum_i(\alpha_i-\alpha_{i}^*)(\phi(x_i)'\phi(x))+b \\
+    &f(x)=\sum_i(\alpha_i-\alpha_{i}^*)k(x_i,x)+b
+    \end{align}
+    $$
     
+    
+    
+
+## 习题
+
+### 模型评估与选择
+
+1.  数据集包含 1000 个样本，其中 500 个正例、 500 个反例，将其划分为包含 70% 样本的训练集和 30% 样本的测试集用于留出法评估，估算有多少种划分方式
+
+    解答：训练集/测试集的划分要尽可能保持数据分布一致
+
+    故训练集中应该包含350个正例、350个反例，剩余的作测试集，那么划分方式有$(C_{500}^{350})^2$
+
+2.  若学习器A的F1值比学习器B高，试分析A的BEP值是否也比B高
+
+    解答：$F_1=\frac{2PR}{P+R}$，$P=\frac{TP}{TP+FP}$，$R=\frac{TP}{TP+FN}$
+
+    BEP是 $P=R$ 时取到的值
+
+    $F_{1A}\gt F_{1B}\Leftrightarrow \frac{1}{P_{1A}}+\frac{1}{R_{1A}}\lt \frac{1}{P_{1B}}+\frac{1}{R_{1B}}$
+
+    $BEP_A=P_{1A}=R_{1A}$，$BEP_B=P_{1B}=R_{1B}$
+
+    $\Rightarrow BEP_A\gt BEP_B$
+
+3.  试阐述真正例率、假正例率与查准率、查全率之间的联系
+
+    解答：
+
+    查全率：$R=\frac{TP}{TP+FN}$
+
+    查准率：$P=\frac{TP}{TP+FP}$
+
+    真正例率：$TPR=\frac{TP}{TP+FN}$，同查全率
+
+    假正例率：$FPR=\frac{FP}{FP+TN}$，即所有反例中被预测为正例的比率
+
+### 线性模型
+
+1.  试着分析在什么情况下，在以下式子$f(x)=w^Tx+b$中不考虑偏置项b
+
+    解答：在样本$x$中有某一个属性为$x_i$为固定值时。此时$w_ix_i+b$等价于偏置项
+
+2.  证明：对于参数$w$，对率回归的目标函数$y=\frac{1}{e^{-(w^Tx+b)}}$是非凸的，但其对数似然函数$l(\beta)=\sum_{i=1}^m(-y_i\beta ^T\overline{x}_i+\ln(1+e^{\beta ^T\overline{x}_i}))$是凸的
+
+    解答：
+
+    引理：对于多元函数，其Hessian Matrix为半正定即为凸函数
+
+    辅助：
+
+    梯度下降法、牛顿法
+
+    有矩阵$A$和向量$x$
+
+    $\frac{\partial Ax}{\partial x}=A^{T}$
+
+    $\frac{\partial Ax}{\partial x^T}=A$
+
+    $\frac{\partial (x^TA)}{\partial x}=A$
+
+    目标函数：$\frac{\partial y}{\partial w}=x(y-y^2)$
+
+    $\frac{\partial ^2y}{\partial w\partial w^T}=xx^Ty(1-y)(1-2y)$，即为Hessian Matrix
+
+    $r(xx^T)=1\Rightarrow 非零特征值只有1个$，标准化以后，二次型的值由$y$决定。当$y$在$(0,1)$之间变化时$y(1-y)(1-2y)$正负号变化，故矩阵并非半正定，因此非凸
+
+    对数似然函数：$\frac{\partial ^2l(\beta)}{\partial \beta \partial \beta^{T}}=\sum_{i=1}^m\overline{x}_i\overline{x}_{i}^Tp_1(\overline{x}_i;\beta)(1-p1(\overline{x}_i;\beta))$
+
+    $\Rightarrow P_{ii}=p_1(\overline{x}_i;\beta)(1-p1(\overline{x}_i;\beta))\geq 0$，$\underset{i\neq j}{P_{ij}=0}$
+
+    二次型恒>=0，因此矩阵为半正定，为凸
+
+### SVM
+
+1.  试证明样本空间中任意点$x$到超平面$(w,b)$的距离为式$r=\frac{|w^Tx+b|}{||w||}$
+
+    解答：
+
+    对于任意点$A$，作$A$到超平面的投影$B$，将距离记为$r$。
+
+    $\overline{BA}=r*\frac{w}{||w||}$
+
+    $w^T\overline{B}+b=0$
+
+    $\overline{B}=\overline{A}-\overline{BA}$
+
+    $\Rightarrow w^T(\overline{A}-r*\frac{w}{||w||})+b=0$
+
+    $\Rightarrow r=\frac{|w^T\overline{A}+b|}{||w||}$
+
+2.  试给出式$\begin{cases}\alpha_i(f(x_i)-y_i-\epsilon-\xi_i)=0 \\ \overline{\alpha_i}(-f(x_i)+y_i-\epsilon-\overline{\xi_i})=0 \\ \alpha_i\overline{\alpha_i}=0，\xi_i\overline{\xi_i}=0 \\ (C-\alpha_i)\xi_i=0，(C-\overline{\alpha_i})\overline{\xi_i}=0\end{cases}$的完整KKT条件
+
+    解答：
+
+### 贝叶斯分类
+
+1.  
